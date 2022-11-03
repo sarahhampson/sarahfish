@@ -11,7 +11,7 @@ rm(list = ls())
 
 # Set working directory
 #setwd("YOUR OWN CHOICE HERE")
-setwd("~/Documents/UNI/2022/Honours/BIOL6502/Data/PilotAnalyses")
+setwd("~/Documents/UNI/2022/Honours/BIOL6502/Data/sarahfish")
 
 # Obtain required functions from 'functions' subfolder
 sapply(list.files("./Functions", pattern="\\.R", full.names=TRUE), 
@@ -23,7 +23,8 @@ install.packages(c("mgcv", "vegan", "lme4", "nlme",
                    "multcomp", "maptools", "sp", 
                    "divDyn", "plotrix", "raster",
                    "rgeos", "fun", "analogue",
-                   "brms", "data.table", "tidyverse"))
+                   "brms", "data.table", "tidyverse,
+                   dyplr"))
 
 # RivFishTIME data
 time_series_data <-read.csv("inputs/1873_2_RivFishTIME_TimeseriesTable.csv")
@@ -40,13 +41,14 @@ consecutive_year_table <- survey_data %>% group_by(TimeSeriesID) %>%
   summarise(number_of_years = length(unique(Year)), first_year = min(Year), last_year = max(Year),
             first_to_last = last_year - first_year, full_data = (number_of_years == first_to_last), 
             species_count = length(unique(Species))) %>%
-  filter(full_data == TRUE)
+  filter(full_data == TRUE, number_of_years >= 10, species_count > 1)
 
-# Remove timeseries where the number of consecutive years is less than 10
-consecutive_year_table <- consecutive_year_table[consecutive_year_table$number_of_years >=10,]
-# Remove time series with less than 2 species
-consecutive_year_table <- consecutive_year_table[consecutive_year_table$species_count >1,]
-
+# Alternatively, create table of timeseries with at least ten years of data
+overten_year_table <- survey_data %>% group_by(TimeSeriesID) %>%
+  summarise(number_of_years = length(unique(Year)), first_year = min(Year), last_year = max(Year),
+            full_data = (number_of_years >= 10), 
+            species_count = length(unique(Species))) %>%
+  filter(full_data == TRUE, species_count > 1)
 
 #Select a few nice and easy time series from consecutive_year_data
 TSG111 <- survey_data[survey_data$TimeSeriesID=="G111",]
