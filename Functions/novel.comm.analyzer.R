@@ -19,7 +19,7 @@ novel.comm.summary <- function(results_list, ts_list){
     
     # Total number of states across all 
   }
-  return ts_list
+  return(ts_list)
 }
   
   
